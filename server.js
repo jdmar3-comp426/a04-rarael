@@ -23,11 +23,15 @@ app.get("/app/", (req, res, next) => {
 
 // Define other CRUD API endpoints using express.js and better-sqlite3
 // CREATE a new user (HTTP method POST) at endpoint /app/new/
-app.post("/app/new/user", (req, res) => {
+app.post("/app/new/", (req, res) => {
 	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)")
 	// need to figure out how to read user, password
-	const info = stmt.run()
-	res.status(200).json({"message":"OK (200)"})
+	const info = stmt.run(req.body.user, req.body.pass)
+	if (info.changes != 0) {
+		res.status(201).json({"message": info.changes + " record created: ID: " + info.lastInsertRowid + " (201)" })
+	} else {
+		res.status(409).json({"message:": "User already exists (409)"})
+	}
 })
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
 app.get("/app/users", (req, res) => {	
@@ -37,17 +41,17 @@ app.get("/app/users", (req, res) => {
 
 // READ a single user (HTTP method GET) at endpoint /app/user/:id
 app.get("/app/users/:id", (req, res) => {
-	const stmt = db.prepare("SELECT * FROM userinfo WHERE id = req.params.id").all();
+	const stmt = db.prepare("SELECT * FROM userinfo WHERE id = req.params.id").get();
 	res.status(200).json(stmt);
 })
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
-	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?, pass) WHERE id = req.params.id")
+	const stmt = db.prepare("UPDATE userinfo SET user = COALESCE(?,user), pass = COALESCE(?, pass) WHERE id = req.params.id").patch()
 	res.status(200).json(stmt)
 })
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {
-	const stmt = db.prepare("DELETE FROM userinfo WHERE id = req.params.id")
+	const stmt = db.prepare("DELETE FROM userinfo WHERE id = req.params.id").delete()
 	res.status(200).json(stmt)
 })
 // Default response for any other request
