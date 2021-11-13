@@ -42,7 +42,13 @@ app.get("/app/users", (req, res) => {
 // READ a single user (HTTP method GET) at endpoint /app/user/:id
 app.get("/app/users/:id", (req, res) => {
 	const stmt = db.prepare("SELECT * FROM userinfo WHERE id = req.params.id").get();
-	res.status(200).json(stmt);
+	const cat = stmt.get(req.params.id)
+	if (cat != undefined) {
+		res.status(404).json({"message": "User not found"})
+	} else {
+		res.status(200).json(stmt);
+	}
+	
 })
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {
