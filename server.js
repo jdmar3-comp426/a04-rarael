@@ -28,7 +28,7 @@ app.post("/app/new/", (req, res) => {
 	// need to figure out how to read user, password
 	const info = stmt.run(req.body.user, md5(req.body.pass))
 	if (info.changes != 0) {
-		res.status(201).json({"message": info.changes + " record created: ID: " + info.lastInsertRowid + " (201)" })
+		res.status(201).json({"message": info.changes + " record created: ID " + info.lastInsertRowid + " (201)" })
 	} else {
 		res.status(409).json({"message:": "User already exists (409)"})
 	}
