@@ -26,7 +26,7 @@ app.get("/app/", (req, res, next) => {
 app.post("/app/new/", (req, res) => {
 	const stmt = db.prepare("INSERT INTO userinfo (user, pass) VALUES (?, ?)")
 	// need to figure out how to read user, password
-	const info = stmt.run(req.body.user, req.body.pass)
+	const info = stmt.run(req.body.user, md5(req.body.pass))
 	if (info.changes != 0) {
 		res.status(201).json({"message": info.changes + " record created: ID: " + info.lastInsertRowid + " (201)" })
 	} else {
@@ -40,13 +40,13 @@ app.get("/app/users", (req, res) => {
 });
 
 // READ a single user (HTTP method GET) at endpoint /app/user/:id
-app.get("/app/users/:id", (req, res) => {
-	const stmt = db.prepare("SELECT * FROM userinfo WHERE id = req.params.id").get();
+app.get("/app/user/:id", (req, res) => {
+	const stmt = db.prepare("SELECT * FROM userinfo WHERE id = ?")
 	const cat = stmt.get(req.params.id)
-	if (cat != undefined) {
+	if (cat == undefined) {
 		res.status(404).json({"message": "User not found"})
 	} else {
-		res.status(200).json(stmt);
+		res.status(200).json(cat);
 	}
 	
 })
